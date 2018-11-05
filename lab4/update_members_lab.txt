@@ -1,0 +1,76 @@
+SQL> 
+SQL> -- Update all MEMBER_TYPE values based on number of dependent CONTACT rows.
+SQL> UPDATE member_lab m
+  2  SET    member_type =
+  3  	     (SELECT   common_lookup_lab_id
+  4  	      FROM     common_lookup_lab
+  5  	      WHERE    common_lookup_context = 'MEMBER_LAB'
+  6  	      AND      common_lookup_type =
+  7  			(SELECT  dt.member_type
+  8  			 FROM	(SELECT   c.member_lab_id
+  9  				 ,	  CASE
+ 10  					    WHEN COUNT(c.member_lab_id) > 1 THEN 'GROUP'
+ 11  					    ELSE 'INDIVIDUAL'
+ 12  					  END AS member_type
+ 13  				 FROM	  contact_lab c
+ 14  				 GROUP BY c.member_lab_id) dt
+ 15  			 WHERE	  dt.member_lab_id = m.member_lab_id));
+
+8 rows updated.
+
+SQL> 
+SQL> -- Modify the MEMBER table to add a NOT NULL constraint to the MEMBER_TYPE column.
+SQL> ALTER TABLE member_lab
+  2    MODIFY (member_type  NUMBER  CONSTRAINT nn_member_lab_1	NOT NULL);
+
+Table altered.
+
+SQL> 
+SQL> -- Use SQL*Plus report formatting commands.
+SQL> COLUMN member_lab_id	   FORMAT 999999 HEADING "MEMBER|ID"
+SQL> 
+SQL> 
+SQL> COLUMN member_lab_id	  FORMAT 999999 HEADING "Member|ID"
+SQL> COLUMN members		  FORMAT 999999 HEADING "Member|Qty #"
+SQL> COLUMN member_type 	  FORMAT 999999 HEADING "Member|Type|ID #"
+SQL> COLUMN common_lookup_lab_id  FORMAT 999999 HEADING "Member|Lookup|ID #"
+SQL> COLUMN common_lookup_type	  FORMAT A12	HEADING "Common|Lookup|Type"
+SQL> SELECT   m.member_lab_id
+  2  ,	      COUNT(contact_lab_id) AS MEMBERS
+  3  ,	      m.member_type
+  4  ,	      cl.common_lookup_lab_id
+  5  ,	      cl.common_lookup_type
+  6  FROM     member_lab m INNER JOIN contact_lab c
+  7  ON       m.member_lab_id = c.member_lab_id INNER JOIN common_lookup_lab cl
+  8  ON       m.member_type = cl.common_lookup_lab_id
+  9  GROUP BY m.member_lab_id
+ 10  ,	      m.member_type
+ 11  ,	      cl.common_lookup_lab_id
+ 12  ,	      cl.common_lookup_type
+ 13  ORDER BY m.member_lab_id;
+
+                 Member  Member Common                                          
+ Member  Member    Type  Lookup Lookup                                          
+     ID   Qty #    ID #    ID # Type                                            
+------- ------- ------- ------- ------------                                    
+   1001       2    1004    1004 GROUP                                           
+   1002       2    1004    1004 GROUP                                           
+   1003       3    1004    1004 GROUP                                           
+   1004       1    1003    1003 INDIVIDUAL                                      
+   1005       1    1003    1003 INDIVIDUAL                                      
+   1006       1    1003    1003 INDIVIDUAL                                      
+   1007       1    1003    1003 INDIVIDUAL                                      
+   1008       1    1003    1003 INDIVIDUAL                                      
+
+8 rows selected.
+
+SQL> -- Commit changes.
+SQL> COMMIT;
+
+Commit complete.
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  Close log file.
+SQL> -- ------------------------------------------------------------------
+SQL> SPOOL OFF
