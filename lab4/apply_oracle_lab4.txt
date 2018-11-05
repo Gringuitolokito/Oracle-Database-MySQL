@@ -1,0 +1,2896 @@
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --   Query to verify seven rows of chained inserts to the five
+SQL> --   dependent tables.
+SQL> -- ------------------------------------------------------------------
+SQL> --    1. MEMBER
+SQL> --    2. CONTACT
+SQL> --    3. ADDRESS
+SQL> --    4. STREET_ADDRESS
+SQL> --    5. TELEPHONE
+SQL> -- ------------------------------------------------------------------
+SQL> 
+SQL> INSERT INTO member_lab
+  2  ( member_lab_id
+  3  , member_type
+  4  , account_number
+  5  , credit_card_number
+  6  , credit_card_type
+  7  , created_by
+  8  , creation_date
+  9  , last_updated_by
+ 10  , last_update_date )
+ 11  VALUES
+ 12  ( member_lab_s1.nextval				   -- member_id
+ 13  , NULL					       -- member_type
+ 14  ,'B293-71445'				       -- account_number
+ 15  ,'1111-2222-3333-4444'			       -- credit_card_number
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'MEMBER_LAB'
+ 19    AND	common_lookup_type = 'DISCOVER_CARD')  -- credit_card_type
+ 20  ,(SELECT	system_user_lab_id
+ 21    FROM	system_user_lab
+ 22    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 23  , SYSDATE					       -- creation_date
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 27  , SYSDATE					       -- last_update_date
+ 28  );
+, NULL                                            -- member_type
+  *
+ERROR at line 13:
+ORA-01400: cannot insert NULL into ("STUDENT"."MEMBER_LAB"."MEMBER_TYPE") 
+
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  Insert first contact in a group account user.
+SQL> -- ------------------------------------------------------------------
+SQL> INSERT INTO contact_lab
+  2  ( contact_lab_id
+  3  , member_lab_id
+  4  , contact_type
+  5  , first_name
+  6  , last_name
+  7  , created_by
+  8  , creation_date
+  9  , last_updated_by
+ 10  , last_update_date )
+ 11  VALUES
+ 12  ( contact_lab_s1.nextval				   -- contact_id
+ 13  , member_lab_s1.currval				   -- member_id
+ 14  ,(SELECT	common_lookup_lab_id
+ 15    FROM	common_lookup_lab
+ 16    WHERE	common_lookup_context = 'CONTACT_LAB'
+ 17    AND	common_lookup_type = 'CUSTOMER')       -- contact_type
+ 18  ,'Randi'					       -- first_name
+ 19  ,'Winn'					       -- last_name
+ 20  ,(SELECT	system_user_lab_id
+ 21    FROM	system_user_lab
+ 22    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 23  , SYSDATE					       -- creation_date
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 27  , SYSDATE					       -- last_update_date
+ 28  );
+INSERT INTO contact_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_CONTACT_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO address_lab
+  2  ( address_lab_id
+  3  , contact_lab_id
+  4  , address_type
+  5  , city
+  6  , state_province
+  7  , postal_code
+  8  , created_by
+  9  , creation_date
+ 10  , last_updated_by
+ 11  , last_update_date )
+ 12  VALUES
+ 13  ( address_lab_s1.nextval				   -- address_id
+ 14  , contact_lab_s1.currval				   -- contact_id
+ 15  ,(SELECT	common_lookup_lab_id
+ 16    FROM	common_lookup_lab
+ 17    WHERE	common_lookup_type = 'HOME')	       -- address_type
+ 18  ,'San Jose'				       -- city
+ 19  ,'CA'					       -- state_province
+ 20  ,'95192'					       -- postal_code
+ 21  ,(SELECT	system_user_lab_id
+ 22    FROM	system_user_lab
+ 23    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 24  , SYSDATE					       -- creation_date
+ 25  ,(SELECT	system_user_lab_id
+ 26    FROM	system_user_lab
+ 27    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 28  , SYSDATE					       -- last_update_date
+ 29  );
+INSERT INTO address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO street_address_lab
+  2  ( street_address_lab_id
+  3  , address_lab_id
+  4  , street_address
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date )
+  9   VALUES
+ 10  ( street_address_lab_s1.nextval			   -- street_address_id
+ 11  , address_lab_s1.currval				   -- address_id
+ 12  ,'10 El Camino Real'			       -- street_address
+ 13  ,(SELECT	system_user_lab_id
+ 14    FROM	system_user_lab
+ 15    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 16  , SYSDATE					       -- creation_date
+ 17  ,(SELECT	system_user_lab_id
+ 18    FROM	system_user_lab
+ 19    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 20  , SYSDATE					       -- last_update_date
+ 21  );
+INSERT INTO street_address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_S_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO telephone_lab
+  2  ( telephone_lab_id
+  3  , contact_lab_id
+  4  , address_lab_id
+  5  , telephone_type
+  6  , country_code
+  7  , area_code
+  8  , telephone_number
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13   VALUES
+ 14  ( telephone_lab_s1.nextval 			   -- telephone_id
+ 15  , address_lab_s1.currval				   -- address_id
+ 16  , contact_lab_s1.currval				   -- contact_id
+ 17  ,(SELECT	common_lookup_lab_id
+ 18    FROM	common_lookup_lab
+ 19    WHERE	common_lookup_context = 'MULTIPLE'
+ 20    AND	common_lookup_type = 'HOME')	       -- telephone_type
+ 21  ,'001'					       -- country_code
+ 22  ,'408'					       -- area_code
+ 23  ,'111-1111'				       -- telephone_number
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 27  , SYSDATE					       -- creation_date
+ 28  ,(SELECT	system_user_lab_id
+ 29    FROM	system_user_lab
+ 30    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 31  , SYSDATE					       -- last_update_date
+ 32  );
+INSERT INTO telephone_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_TELEPHONE_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  Insert second contact in a group account user.
+SQL> -- ------------------------------------------------------------------
+SQL> INSERT INTO contact_lab
+  2  ( contact_lab_id
+  3  , member_lab_id
+  4  , contact_type
+  5  , first_name
+  6  , last_name
+  7  , created_by
+  8  , creation_date
+  9  , last_updated_by
+ 10  , last_update_date )
+ 11  VALUES
+ 12  ( contact_lab_s1.nextval				   -- contact_id
+ 13  , member_lab_s1.currval				   -- member_id
+ 14  ,(SELECT	common_lookup_lab_id
+ 15    FROM	common_lookup_lab
+ 16    WHERE	common_lookup_context = 'CONTACT_LAB'
+ 17    AND	common_lookup_type = 'CUSTOMER')       -- contact_type
+ 18  ,'Brian'					       -- first_name
+ 19  ,'Winn'					       -- last_name
+ 20  ,(SELECT	system_user_lab_id
+ 21    FROM	system_user_lab
+ 22    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 23  , SYSDATE					       -- creation_date
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 27  , SYSDATE					       -- last_update_date
+ 28  );
+INSERT INTO contact_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_CONTACT_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> 
+SQL> INSERT INTO address_lab
+  2  ( address_lab_id
+  3  , contact_lab_id
+  4  , address_type
+  5  , city
+  6  , state_province
+  7  , postal_code
+  8  , created_by
+  9  , creation_date
+ 10  , last_updated_by
+ 11  , last_update_date )
+ 12  VALUES
+ 13  ( address_lab_s1.nextval				   -- address_id
+ 14  , contact_lab_s1.currval				   -- contact_id
+ 15  ,(SELECT	common_lookup_lab_id
+ 16    FROM	common_lookup_lab
+ 17    WHERE	common_lookup_type = 'HOME')	       -- address_type
+ 18  ,'San Jose'				       -- city
+ 19  ,'CA'					       -- state_province
+ 20  ,'95192'					       -- postal_code
+ 21  ,(SELECT	system_user_lab_id
+ 22    FROM	system_user_lab
+ 23    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 24  , SYSDATE					       -- creation_date
+ 25  ,(SELECT	system_user_lab_id
+ 26    FROM	system_user_lab
+ 27    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 28  , SYSDATE					       -- last_update_date
+ 29  );
+INSERT INTO address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO street_address_lab
+  2  ( street_address_lab_id
+  3  , address_lab_id
+  4  , street_address
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date )
+  9   VALUES
+ 10  ( street_address_lab_s1.nextval			   -- street_address_id
+ 11  , address_lab_s1.currval				   -- address_id
+ 12  ,'10 El Camino Real'			       -- street_address
+ 13  ,(SELECT	system_user_lab_id
+ 14    FROM	system_user_lab
+ 15    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 16  , SYSDATE					       -- creation_date
+ 17  ,(SELECT	system_user_lab_id
+ 18    FROM	system_user_lab
+ 19    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 20  , SYSDATE					       -- last_update_date
+ 21  );
+INSERT INTO street_address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_S_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO telephone_lab
+  2  ( telephone_lab_id
+  3  , contact_lab_id
+  4  , address_lab_id
+  5  , telephone_type
+  6  , country_code
+  7  , area_code
+  8  , telephone_number
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13   VALUES
+ 14  ( telephone_lab_s1.nextval 			   -- telephone_id
+ 15  , address_lab_s1.currval				   -- address_id
+ 16  , contact_lab_s1.currval				   -- contact_id
+ 17  ,(SELECT	common_lookup_lab_id
+ 18    FROM	common_lookup_lab
+ 19    WHERE	common_lookup_context = 'MULTIPLE'
+ 20    AND	common_lookup_type = 'HOME')	       -- telephone_type
+ 21  ,'001'					       -- country_code
+ 22  ,'408'					       -- area_code
+ 23  ,'111-1111'				       -- telephone_number
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 27  , SYSDATE					       -- creation_date
+ 28  ,(SELECT	system_user_lab_id
+ 29    FROM	system_user_lab
+ 30    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 31  , SYSDATE					       -- last_update_date
+ 32  );
+INSERT INTO telephone_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_TELEPHONE_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> 
+SQL> INSERT INTO member_lab
+  2  ( member_lab_id
+  3  , member_type
+  4  , account_number
+  5  , credit_card_number
+  6  , credit_card_type
+  7  , created_by
+  8  , creation_date
+  9  , last_updated_by
+ 10  , last_update_date )
+ 11  VALUES
+ 12  ( member_lab_s1.nextval				   -- member_id
+ 13  , NULL					       -- member_type
+ 14  ,'B293-71446'				       -- account_number
+ 15  ,'2222-3333-4444-5555'			       -- credit_card_number
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'MEMBER_LAB'
+ 19    AND	common_lookup_type = 'DISCOVER_CARD')  -- credit_card_type
+ 20  ,(SELECT	system_user_lab_id
+ 21    FROM	system_user_lab
+ 22    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 23  , SYSDATE					       -- creation_date
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 27  , SYSDATE					       -- last_update_date
+ 28  );
+, NULL                                            -- member_type
+  *
+ERROR at line 13:
+ORA-01400: cannot insert NULL into ("STUDENT"."MEMBER_LAB"."MEMBER_TYPE") 
+
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  Insert first contact in a group account user.
+SQL> -- ------------------------------------------------------------------
+SQL> INSERT INTO contact_lab
+  2  ( contact_lab_id
+  3  , member_lab_id
+  4  , contact_type
+  5  , first_name
+  6  , last_name
+  7  , created_by
+  8  , creation_date
+  9  , last_updated_by
+ 10  , last_update_date )
+ 11  VALUES
+ 12  ( contact_lab_s1.nextval				   -- contact_id
+ 13  , member_lab_s1.currval				   -- member_id
+ 14  ,(SELECT	common_lookup_lab_id
+ 15    FROM	common_lookup_lab
+ 16    WHERE	common_lookup_context = 'CONTACT_LAB'
+ 17    AND	common_lookup_type = 'CUSTOMER')       -- contact_type
+ 18  ,'Oscar'					       -- first_name
+ 19  ,'Vizquel' 				       -- last_name
+ 20  ,(SELECT	system_user_lab_id
+ 21    FROM	system_user_lab
+ 22    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 23  , SYSDATE					       -- creation_date
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 27  , SYSDATE					       -- last_update_date
+ 28  );
+INSERT INTO contact_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_CONTACT_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO address_lab
+  2  ( address_lab_id
+  3  , contact_lab_id
+  4  , address_type
+  5  , city
+  6  , state_province
+  7  , postal_code
+  8  , created_by
+  9  , creation_date
+ 10  , last_updated_by
+ 11  , last_update_date )
+ 12  VALUES
+ 13  ( address_lab_s1.nextval				   -- address_id
+ 14  , contact_lab_s1.currval				   -- contact_id
+ 15  ,(SELECT	common_lookup_lab_id
+ 16    FROM	common_lookup_lab
+ 17    WHERE	common_lookup_type = 'HOME')	       -- address_type
+ 18  ,'San Jose'				       -- city
+ 19  ,'CA'					       -- state_province
+ 20  ,'95192'					       -- postal_code
+ 21  ,(SELECT	system_user_lab_id
+ 22    FROM	system_user_lab
+ 23    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 24  , SYSDATE					       -- creation_date
+ 25  ,(SELECT	system_user_lab_id
+ 26    FROM	system_user_lab
+ 27    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 28  , SYSDATE					       -- last_update_date
+ 29  );
+INSERT INTO address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO street_address_lab
+  2  ( street_address_lab_id
+  3  , address_lab_id
+  4  , street_address
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date )
+  9   VALUES
+ 10  ( street_address_lab_s1.nextval			   -- street_address_id
+ 11  , address_lab_s1.currval				   -- address_id
+ 12  ,'12 El Camino Real'			       -- street_address
+ 13  ,(SELECT	system_user_lab_id
+ 14    FROM	system_user_lab
+ 15    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 16  , SYSDATE					       -- creation_date
+ 17  ,(SELECT	system_user_lab_id
+ 18    FROM	system_user_lab
+ 19    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 20  , SYSDATE					       -- last_update_date
+ 21  );
+INSERT INTO street_address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_S_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO telephone_lab
+  2  ( telephone_lab_id
+  3  , contact_lab_id
+  4  , address_lab_id
+  5  , telephone_type
+  6  , country_code
+  7  , area_code
+  8  , telephone_number
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13   VALUES
+ 14  ( telephone_lab_s1.nextval 			   -- telephone_id
+ 15  , address_lab_s1.currval				   -- address_id
+ 16  , contact_lab_s1.currval				   -- contact_id
+ 17  ,(SELECT	common_lookup_lab_id
+ 18    FROM	common_lookup_lab
+ 19    WHERE	common_lookup_context = 'MULTIPLE'
+ 20    AND	common_lookup_type = 'HOME')	       -- telephone_type
+ 21  ,'USA'					       -- country_code
+ 22  ,'408'					       -- area_code
+ 23  ,'222-2222'				       -- telephone_number
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 27  , SYSDATE					       -- creation_date
+ 28  ,(SELECT	system_user_lab_id
+ 29    FROM	system_user_lab
+ 30    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 31  , SYSDATE					       -- last_update_date
+ 32  );
+INSERT INTO telephone_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_TELEPHONE_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  Insert second contact in a group account user.
+SQL> -- ------------------------------------------------------------------
+SQL> INSERT INTO contact_lab
+  2  ( contact_lab_id
+  3  , member_lab_id
+  4  , contact_type
+  5  , first_name
+  6  , last_name
+  7  , created_by
+  8  , creation_date
+  9  , last_updated_by
+ 10  , last_update_date )
+ 11  VALUES
+ 12  ( contact_lab_s1.nextval				   -- contact_id
+ 13  , member_lab_s1.currval				   -- member_id
+ 14  ,(SELECT	common_lookup_lab_id
+ 15    FROM	common_lookup_lab
+ 16    WHERE	common_lookup_context = 'CONTACT_LAB'
+ 17    AND	common_lookup_type = 'CUSTOMER')       -- contact_type
+ 18  ,'Doreen'					       -- first_name
+ 19  ,'Vizquel' 				       -- last_name
+ 20  ,(SELECT	system_user_lab_id
+ 21    FROM	system_user_lab
+ 22    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 23  , SYSDATE					       -- creation_date
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 27  , SYSDATE					       -- last_update_date
+ 28  );
+INSERT INTO contact_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_CONTACT_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> 
+SQL> INSERT INTO address_lab
+  2  ( address_lab_id
+  3  , contact_lab_id
+  4  , address_type
+  5  , city
+  6  , state_province
+  7  , postal_code
+  8  , created_by
+  9  , creation_date
+ 10  , last_updated_by
+ 11  , last_update_date )
+ 12  VALUES
+ 13  ( address_lab_s1.nextval				   -- address_id
+ 14  , contact_lab_s1.currval				   -- contact_id
+ 15  ,(SELECT	common_lookup_lab_id
+ 16    FROM	common_lookup_lab
+ 17    WHERE	common_lookup_type = 'HOME')	       -- address_type
+ 18  ,'San Jose'				       -- city
+ 19  ,'CA'					       -- state_province
+ 20  ,'95192'					       -- postal_code
+ 21  ,(SELECT	system_user_lab_id
+ 22    FROM	system_user_lab
+ 23    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 24  , SYSDATE					       -- creation_date
+ 25  ,(SELECT	system_user_lab_id
+ 26    FROM	system_user_lab
+ 27    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 28  , SYSDATE					       -- last_update_date
+ 29  );
+INSERT INTO address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO street_address_lab
+  2  ( street_address_lab_id
+  3  , address_lab_id
+  4  , street_address
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date )
+  9   VALUES
+ 10  ( street_address_lab_s1.nextval			   -- street_address_id
+ 11  , address_lab_s1.currval				   -- address_id
+ 12  ,'12 El Camino Real'			       -- street_address
+ 13  ,(SELECT	system_user_lab_id
+ 14    FROM	system_user_lab
+ 15    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 16  , SYSDATE					       -- creation_date
+ 17  ,(SELECT	system_user_lab_id
+ 18    FROM	system_user_lab
+ 19    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 20  , SYSDATE					       -- last_update_date
+ 21  );
+INSERT INTO street_address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_S_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO telephone_lab
+  2  ( telephone_lab_id
+  3  , contact_lab_id
+  4  , address_lab_id
+  5  , telephone_type
+  6  , country_code
+  7  , area_code
+  8  , telephone_number
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13   VALUES
+ 14  ( telephone_lab_s1.nextval 			   -- telephone_id
+ 15  , address_lab_s1.currval				   -- address_id
+ 16  , contact_lab_s1.currval				   -- contact_id
+ 17  ,(SELECT	common_lookup_lab_id
+ 18    FROM	common_lookup_lab
+ 19    WHERE	common_lookup_context = 'MULTIPLE'
+ 20    AND	common_lookup_type = 'HOME')	       -- telephone_type
+ 21  ,'USA'					       -- country_code
+ 22  ,'408'					       -- area_code
+ 23  ,'222-2222'				       -- telephone_number
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 27  , SYSDATE					       -- creation_date
+ 28  ,(SELECT	system_user_lab_id
+ 29    FROM	system_user_lab
+ 30    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 31  , SYSDATE					       -- last_update_date
+ 32  );
+INSERT INTO telephone_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_TELEPHONE_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> 
+SQL> INSERT INTO member_lab
+  2  ( member_lab_id
+  3  , member_type
+  4  , account_number
+  5  , credit_card_number
+  6  , credit_card_type
+  7  , created_by
+  8  , creation_date
+  9  , last_updated_by
+ 10  , last_update_date )
+ 11  VALUES
+ 12  ( member_lab_s1.nextval				   -- member_id
+ 13  , NULL					       -- member_type
+ 14  ,'B293-71447'				       -- account_number
+ 15  ,'3333-4444-5555-6666'			       -- credit_card_number
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'MEMBER_LAB'
+ 19    AND	common_lookup_type = 'DISCOVER_CARD')  -- credit_card_type
+ 20  ,(SELECT	system_user_lab_id
+ 21    FROM	system_user_lab
+ 22    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 23  , SYSDATE					       -- creation_date
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 27  , SYSDATE					       -- last_update_date
+ 28  );
+, NULL                                            -- member_type
+  *
+ERROR at line 13:
+ORA-01400: cannot insert NULL into ("STUDENT"."MEMBER_LAB"."MEMBER_TYPE") 
+
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  Insert first contact in a group account user.
+SQL> -- ------------------------------------------------------------------
+SQL> INSERT INTO contact_lab
+  2  ( contact_lab_id
+  3  , member_lab_id
+  4  , contact_type
+  5  , first_name
+  6  , last_name
+  7  , created_by
+  8  , creation_date
+  9  , last_updated_by
+ 10  , last_update_date )
+ 11  VALUES
+ 12  ( contact_lab_s1.nextval				   -- contact_id
+ 13  , member_lab_s1.currval				   -- member_id
+ 14  ,(SELECT	common_lookup_lab_id
+ 15    FROM	common_lookup_lab
+ 16    WHERE	common_lookup_context = 'CONTACT_LAB'
+ 17    AND	common_lookup_type = 'CUSTOMER')       -- contact_type
+ 18  ,'Meaghan' 				       -- first_name
+ 19  ,'Sweeney' 				       -- last_name
+ 20  ,(SELECT	system_user_lab_id
+ 21    FROM	system_user_lab
+ 22    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 23  , SYSDATE					       -- creation_date
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 27  , SYSDATE					       -- last_update_date
+ 28  );
+INSERT INTO contact_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_CONTACT_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO address_lab
+  2  ( address_lab_id
+  3  , contact_lab_id
+  4  , address_type
+  5  , city
+  6  , state_province
+  7  , postal_code
+  8  , created_by
+  9  , creation_date
+ 10  , last_updated_by
+ 11  , last_update_date )
+ 12  VALUES
+ 13  ( address_lab_s1.nextval				   -- address_id
+ 14  , contact_lab_s1.currval				   -- contact_id
+ 15  ,(SELECT	common_lookup_lab_id
+ 16    FROM	common_lookup_lab
+ 17    WHERE	common_lookup_type = 'HOME')	       -- address_type
+ 18  ,'San Jose'				       -- city
+ 19  ,'CA'					       -- state_province
+ 20  ,'95192'					       -- postal_code
+ 21  ,(SELECT	system_user_lab_id
+ 22    FROM	system_user_lab
+ 23    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 24  , SYSDATE					       -- creation_date
+ 25  ,(SELECT	system_user_lab_id
+ 26    FROM	system_user_lab
+ 27    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 28  , SYSDATE					       -- last_update_date
+ 29  );
+INSERT INTO address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO street_address_lab
+  2  ( street_address_lab_id
+  3  , address_lab_id
+  4  , street_address
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date )
+  9   VALUES
+ 10  ( street_address_lab_s1.nextval			   -- street_address_id
+ 11  , address_lab_s1.currval				   -- address_id
+ 12  ,'14 El Camino Real'			       -- street_address
+ 13  ,(SELECT	system_user_lab_id
+ 14    FROM	system_user_lab
+ 15    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 16  , SYSDATE					       -- creation_date
+ 17  ,(SELECT	system_user_lab_id
+ 18    FROM	system_user_lab
+ 19    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 20  , SYSDATE					       -- last_update_date
+ 21  );
+INSERT INTO street_address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_S_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO telephone_lab
+  2  ( telephone_lab_id
+  3  , contact_lab_id
+  4  , address_lab_id
+  5  , telephone_type
+  6  , country_code
+  7  , area_code
+  8  , telephone_number
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13   VALUES
+ 14  ( telephone_lab_s1.nextval 			   -- telephone_id
+ 15  , address_lab_s1.currval				   -- address_id
+ 16  , contact_lab_s1.currval				   -- contact_id
+ 17  ,(SELECT	common_lookup_lab_id
+ 18    FROM	common_lookup_lab
+ 19    WHERE	common_lookup_context = 'MULTIPLE'
+ 20    AND	common_lookup_type = 'HOME')	       -- telephone_type
+ 21  ,'USA'					       -- country_code
+ 22  ,'408'					       -- area_code
+ 23  ,'333-3333'				       -- telephone_number
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 27  , SYSDATE					       -- creation_date
+ 28  ,(SELECT	system_user_lab_id
+ 29    FROM	system_user_lab
+ 30    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 31  , SYSDATE					       -- last_update_date
+ 32  );
+INSERT INTO telephone_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_TELEPHONE_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  Insert second contact in a group account user.
+SQL> -- ------------------------------------------------------------------
+SQL> INSERT INTO contact_lab
+  2  ( contact_lab_id
+  3  , member_lab_id
+  4  , contact_type
+  5  , first_name
+  6  , last_name
+  7  , created_by
+  8  , creation_date
+  9  , last_updated_by
+ 10  , last_update_date )
+ 11  VALUES
+ 12  ( contact_lab_s1.nextval				   -- contact_id
+ 13  , member_lab_s1.currval				   -- member_id
+ 14  ,(SELECT	common_lookup_lab_id
+ 15    FROM	common_lookup_lab
+ 16    WHERE	common_lookup_context = 'CONTACT_LAB'
+ 17    AND	common_lookup_type = 'CUSTOMER')       -- contact_type
+ 18  ,'Matthew' 					-- first_name
+ 19  ,'Sweeney' 				       -- last_name
+ 20  ,(SELECT	system_user_lab_id
+ 21    FROM	system_user_lab
+ 22    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 23  , SYSDATE					       -- creation_date
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 27  , SYSDATE					       -- last_update_date
+ 28  );
+INSERT INTO contact_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_CONTACT_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> 
+SQL> INSERT INTO address_lab
+  2  ( address_lab_id
+  3  , contact_lab_id
+  4  , address_type
+  5  , city
+  6  , state_province
+  7  , postal_code
+  8  , created_by
+  9  , creation_date
+ 10  , last_updated_by
+ 11  , last_update_date )
+ 12  VALUES
+ 13  ( address_lab_s1.nextval				   -- address_id
+ 14  , contact_lab_s1.currval				   -- contact_id
+ 15  ,(SELECT	common_lookup_lab_id
+ 16    FROM	common_lookup_lab
+ 17    WHERE	common_lookup_type = 'HOME')	       -- address_type
+ 18  ,'San Jose'				       -- city
+ 19  ,'CA'					       -- state_province
+ 20  ,'95192'					       -- postal_code
+ 21  ,(SELECT	system_user_lab_id
+ 22    FROM	system_user_lab
+ 23    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 24  , SYSDATE					       -- creation_date
+ 25  ,(SELECT	system_user_lab_id
+ 26    FROM	system_user_lab
+ 27    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 28  , SYSDATE					       -- last_update_date
+ 29  );
+INSERT INTO address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO street_address_lab
+  2  ( street_address_lab_id
+  3  , address_lab_id
+  4  , street_address
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date )
+  9   VALUES
+ 10  ( street_address_lab_s1.nextval			   -- street_address_id
+ 11  , address_lab_s1.currval				   -- address_id
+ 12  ,'14 El Camino Real'			       -- street_address
+ 13  ,(SELECT	system_user_lab_id
+ 14    FROM	system_user_lab
+ 15    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 16  , SYSDATE					       -- creation_date
+ 17  ,(SELECT	system_user_lab_id
+ 18    FROM	system_user_lab
+ 19    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 20  , SYSDATE					       -- last_update_date
+ 21  );
+INSERT INTO street_address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_S_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO telephone_lab
+  2  ( telephone_lab_id
+  3  , contact_lab_id
+  4  , address_lab_id
+  5  , telephone_type
+  6  , country_code
+  7  , area_code
+  8  , telephone_number
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13   VALUES
+ 14  ( telephone_lab_s1.nextval 			   -- telephone_id
+ 15  , address_lab_s1.currval				   -- address_id
+ 16  , contact_lab_s1.currval				   -- contact_id
+ 17  ,(SELECT	common_lookup_lab_id
+ 18    FROM	common_lookup_lab
+ 19    WHERE	common_lookup_context = 'MULTIPLE'
+ 20    AND	common_lookup_type = 'HOME')	       -- telephone_type
+ 21  ,'USA'					       -- country_code
+ 22  ,'408'					       -- area_code
+ 23  ,'333-3333'				       -- telephone_number
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 27  , SYSDATE					       -- creation_date
+ 28  ,(SELECT	system_user_lab_id
+ 29    FROM	system_user_lab
+ 30    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 31  , SYSDATE					       -- last_update_date
+ 32  );
+INSERT INTO telephone_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_TELEPHONE_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  Insert third contact in a group account user.
+SQL> -- ------------------------------------------------------------------
+SQL> INSERT INTO contact_lab
+  2  ( contact_lab_id
+  3  , member_lab_id
+  4  , contact_type
+  5  , first_name
+  6  , middle_name
+  7  , last_name
+  8  , created_by
+  9  , creation_date
+ 10  , last_updated_by
+ 11  , last_update_date )
+ 12  VALUES
+ 13  ( contact_lab_s1.nextval				   -- contact_id
+ 14  , member_lab_s1.currval				   -- member_id
+ 15  ,(SELECT	common_lookup_lab_id
+ 16    FROM	common_lookup_lab
+ 17    WHERE	common_lookup_context = 'CONTACT_LAB'
+ 18    AND	common_lookup_type = 'CUSTOMER')       -- contact_type
+ 19  ,'Ian'					       -- first_name
+ 20  ,'M'					       -- middle_name
+ 21  ,'Sweeney' 				       -- last_name
+ 22  ,(SELECT	system_user_lab_id
+ 23    FROM	system_user_lab
+ 24    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 25  , SYSDATE					       -- creation_date
+ 26  ,(SELECT	system_user_lab_id
+ 27    FROM	system_user_lab
+ 28    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 29  , SYSDATE					       -- last_update_date
+ 30  );
+INSERT INTO contact_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_CONTACT_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> 
+SQL> INSERT INTO address_lab
+  2  ( address_lab_id
+  3  , contact_lab_id
+  4  , address_type
+  5  , city
+  6  , state_province
+  7  , postal_code
+  8  , created_by
+  9  , creation_date
+ 10  , last_updated_by
+ 11  , last_update_date )
+ 12  VALUES
+ 13  ( address_lab_s1.nextval				   -- address_id
+ 14  , contact_lab_s1.currval				   -- contact_id
+ 15  ,(SELECT	common_lookup_lab_id
+ 16    FROM	common_lookup_lab
+ 17    WHERE	common_lookup_type = 'HOME')	       -- address_type
+ 18  ,'San Jose'				       -- city
+ 19  ,'CA'					       -- state_province
+ 20  ,'95192'					       -- postal_code
+ 21  ,(SELECT	system_user_lab_id
+ 22    FROM	system_user_lab
+ 23    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 24  , SYSDATE					       -- creation_date
+ 25  ,(SELECT	system_user_lab_id
+ 26    FROM	system_user_lab
+ 27    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 28  , SYSDATE					       -- last_update_date
+ 29  );
+INSERT INTO address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO street_address_lab
+  2  ( street_address_lab_id
+  3  , address_lab_id
+  4  , street_address
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date )
+  9   VALUES
+ 10  ( street_address_lab_s1.nextval			   -- street_address_id
+ 11  , address_lab_s1.currval				   -- address_id
+ 12  ,'14 El Camino Real'			       -- street_address
+ 13  ,(SELECT	system_user_lab_id
+ 14    FROM	system_user_lab
+ 15    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 16  , SYSDATE					       -- creation_date
+ 17  ,(SELECT	system_user_lab_id
+ 18    FROM	system_user_lab
+ 19    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 20  , SYSDATE					       -- last_update_date
+ 21  );
+INSERT INTO street_address_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_S_ADDRESS_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> INSERT INTO telephone_lab
+  2  ( telephone_lab_id
+  3  , contact_lab_id
+  4  , address_lab_id
+  5  , telephone_type
+  6  , country_code
+  7  , area_code
+  8  , telephone_number
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13   VALUES
+ 14  ( telephone_lab_s1.nextval 			   -- telephone_id
+ 15  , address_lab_s1.currval				   -- address_id
+ 16  , contact_lab_s1.currval				   -- contact_id
+ 17  ,(SELECT	common_lookup_lab_id
+ 18    FROM	common_lookup_lab
+ 19    WHERE	common_lookup_context = 'MULTIPLE'
+ 20    AND	common_lookup_type = 'HOME')	       -- telephone_type
+ 21  ,'USA'					       -- country_code
+ 22  ,'408'					       -- area_code
+ 23  ,'333-3333'				       -- telephone_number
+ 24  ,(SELECT	system_user_lab_id
+ 25    FROM	system_user_lab
+ 26    WHERE	system_user_name = 'SYSADMIN')	       -- created_by
+ 27  , SYSDATE					       -- creation_date
+ 28  ,(SELECT	system_user_lab_id
+ 29    FROM	system_user_lab
+ 30    WHERE	system_user_name = 'SYSADMIN')	       -- last_updated_by
+ 31  , SYSDATE					       -- last_update_date
+ 32  );
+INSERT INTO telephone_lab
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STUDENT.FK_TELEPHONE_LAB_1) violated - parent
+key not found 
+
+
+SQL> 
+SQL> COL account_number  FORMAT A10  HEADING "Account|Number"
+SQL> COL full_name	 FORMAT A16  HEADING "Name|(Last, First MI)"
+SQL> COL city		 FORMAT A12  HEADING "City"
+SQL> COL state_province  FORMAT A10  HEADING "State"
+SQL> COL telephone	 FORMAT A18  HEADING "Telephone"
+SQL> SELECT   m.account_number
+  2  ,	      c.last_name || ', ' || c.first_name
+  3  ||       CASE
+  4  		WHEN c.middle_name IS NOT NULL THEN ' ' || c.middle_name
+  5  	      END AS full_name
+  6  ,	      a.city
+  7  ,	      a.state_province
+  8  ,	      t.country_code || '-(' || t.area_code || ') ' || t.telephone_number AS telephone
+  9  FROM     member_lab m INNER JOIN contact_lab c ON m.member_lab_id = c.member_lab_id INNER JOIN
+ 10  	      address_lab a ON c.contact_lab_id = a.contact_lab_id INNER JOIN
+ 11  	      street_address sa ON a.address_lab_id = sa.address_id INNER JOIN
+ 12  	      telephone t ON c.contact_lab_id = t.contact_id AND a.address_lab_id = t.address_id
+ 13  WHERE    c.last_name = 'Vizquel';
+
+Account    Name                                                                 
+Number     (Last, First MI) City         State      Telephone                   
+---------- ---------------- ------------ ---------- ------------------          
+B293-71446 Vizquel, Oscar   San Jose     CA         USA-(408) 222-2222          
+B293-71446 Vizquel, Doreen  San Jose     CA         USA-(408) 222-2222          
+
+2 rows selected.
+
+SQL> 
+SQL> COL member_lab_id	     FORMAT 9999 HEADING "Acct|ID #"
+SQL> COL account_number  FORMAT A10  HEADING "Account|Number"
+SQL> COL full_name	 FORMAT A16  HEADING "Name|(Last, First MI)"
+SQL> COL city		 FORMAT A12  HEADING "City"
+SQL> COL state_province  FORMAT A10  HEADING "State"
+SQL> COL telephone	 FORMAT A18  HEADING "Telephone"
+SQL> SELECT   m.member_lab_id
+  2  ,	      m.account_number
+  3  ,	      c.last_name || ', ' || c.first_name
+  4  ||       CASE
+  5  		WHEN c.middle_name IS NOT NULL THEN ' ' || SUBSTR(c.middle_name,1,1)
+  6  	      END AS full_name
+  7  ,	      a.city
+  8  ,	      a.state_province
+  9  ,	      t.country_code || '-(' || t.area_code || ') ' || t.telephone_number AS telephone
+ 10  FROM     member_lab m INNER JOIN contact_lab c ON m.member_lab_id = c.member_lab_id INNER JOIN
+ 11  	      address_lab a ON c.contact_lab_id = a.contact_lab_id INNER JOIN
+ 12  	      street_address sa ON a.address_lab_id = sa.address_id INNER JOIN
+ 13  	      telephone t ON c.contact_lab_id = t.contact_id AND a.address_lab_id = t.address_id
+ 14  WHERE    last_name IN ('Sweeney','Vizquel','Winn');
+
+ Acct Account    Name                                                           
+ ID # Number     (Last, First MI) City         State      Telephone             
+----- ---------- ---------------- ------------ ---------- ------------------    
+ 1001 B293-71445 Winn, Randi      San Jose     CA         001-(408) 111-1111    
+ 1001 B293-71445 Winn, Brian      San Jose     CA         001-(408) 111-1111    
+ 1002 B293-71446 Vizquel, Oscar   San Jose     CA         USA-(408) 222-2222    
+ 1002 B293-71446 Vizquel, Doreen  San Jose     CA         USA-(408) 222-2222    
+ 1003 B293-71447 Sweeney, Meaghan San Jose     CA         USA-(408) 333-3333    
+ 1003 B293-71447 Sweeney, Matthew San Jose     CA         USA-(408) 333-3333    
+ 1003 B293-71447 Sweeney, Ian M   San Jose     CA         USA-(408) 333-3333    
+
+7 rows selected.
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  Display the 21 inserts into the item table.
+SQL> -- ------------------------------------------------------------------
+SQL> 
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'9736-05640-4'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'DVD_WIDE_SCREEN')
+ 20  ,'The Hunt for Red October'
+ 21  ,'Special Collector''s Edition'
+ 22  ,'PG'
+ 23  ,'02-MAR-90'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'24543-02392'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'DVD_WIDE_SCREEN')
+ 20  ,'Star Wars I'
+ 21  ,'Phantom Menace'
+ 22  ,'PG'
+ 23  ,'04-MAY-99'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'24543-5615'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'DVD_FULL_SCREEN')
+ 20  ,'Star Wars II'
+ 21  ,'Attack of the Clones'
+ 22  ,'PG'
+ 23  ,'16-MAY-02'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'24543-05539'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'DVD_WIDE_SCREEN')
+ 20  ,'Star Wars II'
+ 21  ,'Attack of the Clones'
+ 22  ,'PG'
+ 23  ,'16-MAY-02'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'24543-20309'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'DVD_WIDE_SCREEN')
+ 20  ,'Star Wars III'
+ 21  ,'Revenge of the Sith'
+ 22  ,'PG13'
+ 23  ,'19-MAY-05'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'86936-70380'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'DVD_WIDE_SCREEN')
+ 20  ,'The Chronicles of Narnia'
+ 21  ,'The Lion, the Witch and the Wardrobe','PG'
+ 22  ,'16-MAY-02'
+ 23  , 1001
+ 24  , SYSDATE
+ 25  , 1001
+ 26  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'91493-06475'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'XBOX')
+ 20  ,'RoboCop'
+ 21  ,''
+ 22  ,'Mature'
+ 23  ,'24-JUL-03'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'93155-11810'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'XBOX')
+ 20  ,'Pirates of the Caribbean'
+ 21  ,''
+ 22  ,'Teen'
+ 23  ,'30-JUN-03'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'12725-00173'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'XBOX')
+ 20  ,'The Chronicles of Narnia'
+ 21  ,'The Lion, the Witch and the Wardrobe'
+ 22  ,'Everyone'
+ 23  ,'30-JUN-03'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'45496-96128'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'NINTENDO_GAMECUBE')
+ 20  ,'MarioKart'
+ 21  ,'Double Dash'
+ 22  ,'Everyone'
+ 23  ,'17-NOV-03'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'08888-32214'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'PLAYSTATION2')
+ 20  ,'Splinter Cell'
+ 21  ,'Chaos Theory'
+ 22  ,'Teen'
+ 23  ,'08-APR-03'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'14633-14821'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'PLAYSTATION2')
+ 20  ,'Need for Speed'
+ 21  ,'Most Wanted'
+ 22  ,'Everyone'
+ 23  ,'15-NOV-04'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'10425-29944'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'XBOX')
+ 20  ,'The DaVinci Code'
+ 21  ,''
+ 22  ,'Teen'
+ 23  ,'19-MAY-06'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'52919-52057'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'XBOX')
+ 20  ,'Cars'
+ 21  ,''
+ 22  ,'Everyone'
+ 23  ,'28-APR-06'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'9689-80547-3'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'BLU-RAY')
+ 20  ,'Beau Geste'
+ 21  ,''
+ 22  ,'PG'
+ 23  ,'01-MAR-92'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'53939-64103'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'BLU-RAY')
+ 20  ,'I Remember Mama'
+ 21  ,''
+ 22  ,'NR'
+ 23  ,'05-JAN-98'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'24543-01292'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'BLU-RAY')
+ 20  ,'Tora! Tora! Tora!'
+ 21  ,'The Attack on Pearl Harbor'
+ 22  ,'G'
+ 23  ,'02-NOV-99'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'43396-60047'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'BLU-RAY')
+ 20  ,'A Man for All Seasons'
+ 21  ,''
+ 22  ,'G'
+ 23  ,'28-JUN-94'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'43396-70603'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'BLU-RAY')
+ 20  ,'Hook'
+ 21  ,''
+ 22  ,'PG'
+ 23  ,'11-DEC-91'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'85391-13213'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'BLU-RAY')
+ 20  ,'Around the World in 80 Days'
+ 21  ,''
+ 22  ,'G'
+ 23  ,'04-DEC-92'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO item_lab
+  2  ( item_lab_id
+  3  , item_barcode
+  4  , item_type
+  5  , item_title
+  6  , item_subtitle
+  7  , item_rating
+  8  , item_release_date
+  9  , created_by
+ 10  , creation_date
+ 11  , last_updated_by
+ 12  , last_update_date )
+ 13  VALUES
+ 14  ( item_lab_s1.nextval
+ 15  ,'85391-10843'
+ 16  ,(SELECT	common_lookup_lab_id
+ 17    FROM	common_lookup_lab
+ 18    WHERE	common_lookup_context = 'ITEM_LAB'
+ 19    AND	common_lookup_type = 'BLU-RAY')
+ 20  ,'Camelot'
+ 21  ,''
+ 22  ,'G'
+ 23  ,'15-MAY-98'
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> 
+SQL> SET PAGESIZE 99
+SQL> COL item_labid		   FORMAT 9999	HEADING "Item|ID #"
+SQL> COL common__lookup_meaning  FORMAT A20  HEADING "Item Description"
+SQL> COL item_title		FORMAT A30  HEADING "Item Title"
+SQL> COL item_release_date	FORMAT A11  HEADING "Item|Release|Date"
+SQL> SELECT   i.item_lab_id
+  2  ,	      cl.common_lookup_meaning
+  3  ,	      i.item_title
+  4  ,	      i.item_release_date
+  5  FROM     item_lab i INNER JOIN common_lookup cl ON i.item_type = cl.common_lookup_id;
+
+                                                          Item                  
+ Item                                                     Release               
+ ID # Item Description     Item Title                     Date                  
+----- -------------------- ------------------------------ -----------           
+ 1001 DVD: Wide Screen     The Hunt for Red October       02-MAR-90             
+ 1002 DVD: Wide Screen     Star Wars I                    04-MAY-99             
+ 1003 DVD: Full Screen     Star Wars II                   16-MAY-02             
+ 1004 DVD: Wide Screen     Star Wars II                   16-MAY-02             
+ 1005 DVD: Wide Screen     Star Wars III                  19-MAY-05             
+ 1006 DVD: Wide Screen     The Chronicles of Narnia       16-MAY-02             
+ 1007 XBOX                 RoboCop                        24-JUL-03             
+ 1008 XBOX                 Pirates of the Caribbean       30-JUN-03             
+ 1009 XBOX                 The Chronicles of Narnia       30-JUN-03             
+ 1010 Nintendo Gamecube    MarioKart                      17-NOV-03             
+ 1011 Playstation2         Splinter Cell                  08-APR-03             
+ 1012 Playstation2         Need for Speed                 15-NOV-04             
+ 1013 XBOX                 The DaVinci Code               19-MAY-06             
+ 1014 XBOX                 Cars                           28-APR-06             
+ 1015 Blu-ray              Beau Geste                     01-MAR-92             
+ 1016 Blu-ray              I Remember Mama                05-JAN-98             
+ 1017 Blu-ray              Tora! Tora! Tora!              02-NOV-99             
+ 1018 Blu-ray              A Man for All Seasons          28-JUN-94             
+ 1019 Blu-ray              Hook                           11-DEC-91             
+ 1020 Blu-ray              Around the World in 80 Days    04-DEC-92             
+ 1021 Blu-ray              Camelot                        15-MAY-98             
+ 1022 DVD: Wide Screen     The Hunt for Red October       02-MAR-90             
+ 1023 DVD: Wide Screen     Star Wars I                    04-MAY-99             
+ 1024 DVD: Full Screen     Star Wars II                   16-MAY-02             
+ 1025 DVD: Wide Screen     Star Wars II                   16-MAY-02             
+ 1026 DVD: Wide Screen     Star Wars III                  19-MAY-05             
+ 1027 DVD: Wide Screen     The Chronicles of Narnia       16-MAY-02             
+ 1028 XBOX                 RoboCop                        24-JUL-03             
+ 1029 XBOX                 Pirates of the Caribbean       30-JUN-03             
+ 1030 XBOX                 The Chronicles of Narnia       30-JUN-03             
+ 1031 Nintendo Gamecube    MarioKart                      17-NOV-03             
+ 1032 Playstation2         Splinter Cell                  08-APR-03             
+ 1033 Playstation2         Need for Speed                 15-NOV-04             
+ 1034 XBOX                 The DaVinci Code               19-MAY-06             
+ 1035 XBOX                 Cars                           28-APR-06             
+ 1036 Blu-ray              Beau Geste                     01-MAR-92             
+ 1037 Blu-ray              I Remember Mama                05-JAN-98             
+ 1038 Blu-ray              Tora! Tora! Tora!              02-NOV-99             
+ 1039 Blu-ray              A Man for All Seasons          28-JUN-94             
+ 1040 Blu-ray              Hook                           11-DEC-91             
+ 1041 Blu-ray              Around the World in 80 Days    04-DEC-92             
+ 1042 Blu-ray              Camelot                        15-MAY-98             
+
+42 rows selected.
+
+SQL> 
+SQL> 
+SQL> -- Transaction Management Example.
+SQL> CREATE OR REPLACE PROCEDURE contact_insert
+  2  ( pv_member_type	      VARCHAR2
+  3  , pv_account_number      VARCHAR2
+  4  , pv_credit_card_number  VARCHAR2
+  5  , pv_credit_card_type    VARCHAR2
+  6  , pv_first_name	      VARCHAR2
+  7  , pv_middle_name	      VARCHAR2 := ''
+  8  , pv_last_name	      VARCHAR2
+  9  , pv_contact_type	      VARCHAR2
+ 10  , pv_address_type	      VARCHAR2
+ 11  , pv_city		      VARCHAR2
+ 12  , pv_state_province      VARCHAR2
+ 13  , pv_postal_code	      VARCHAR2
+ 14  , pv_street_address      VARCHAR2
+ 15  , pv_telephone_type      VARCHAR2
+ 16  , pv_country_code	      VARCHAR2
+ 17  , pv_area_code	      VARCHAR2
+ 18  , pv_telephone_number    VARCHAR2
+ 19  , pv_created_by	      NUMBER   := 1001
+ 20  , pv_creation_date       DATE     := SYSDATE
+ 21  , pv_last_updated_by     NUMBER   := 1001
+ 22  , pv_last_update_date    DATE     := SYSDATE) IS
+ 23  
+ 24  BEGIN
+ 25  
+ 26    /* Create a SAVEPOINT as a starting point. */
+ 27    SAVEPOINT starting_point;
+ 28  
+ 29    /* Insert into the member_lab table. */
+ 30    INSERT INTO member_lab
+ 31    ( member_lab_id
+ 32    , member_type
+ 33    , account_number
+ 34    , credit_card_number
+ 35    , credit_card_type
+ 36    , created_by
+ 37    , creation_date
+ 38    , last_updated_by
+ 39    , last_update_date )
+ 40    VALUES
+ 41    ( member_lab_s1.NEXTVAL
+ 42    ,(SELECT   common_lookup_lab_id
+ 43  	 FROM	  common_lookup_lab
+ 44  	 WHERE	  common_lookup_context = 'MEMBER_LAB'
+ 45  	 AND	  common_lookup_type = pv_member_type)
+ 46    , pv_account_number
+ 47    , pv_credit_card_number
+ 48    ,(SELECT   common_lookup_lab_id
+ 49  	 FROM	  common_lookup_lab
+ 50  	 WHERE	  common_lookup_context = 'MEMBER_LAB'
+ 51  	 AND	  common_lookup_type = pv_credit_card_type)
+ 52    , pv_created_by
+ 53    , pv_creation_date
+ 54    , pv_last_updated_by
+ 55    , pv_last_update_date );
+ 56  
+ 57    /* Insert into the contact_lab table. */
+ 58    INSERT INTO contact_lab
+ 59    VALUES
+ 60    ( contact_lab_s1.NEXTVAL
+ 61    , member_lab_s1.CURRVAL
+ 62    ,(SELECT   common_lookup_lab_id
+ 63  	 FROM	  common_lookup_lab
+ 64  	 WHERE	  common_lookup_context = 'CONTACT_LAB'
+ 65  	 AND	  common_lookup_type = pv_contact_type)
+ 66    , pv_first_name
+ 67    , pv_middle_name
+ 68    , pv_last_name
+ 69    , pv_created_by
+ 70    , pv_creation_date
+ 71    , pv_last_updated_by
+ 72    , pv_last_update_date );
+ 73  
+ 74    /* Insert into the address_lab table. */
+ 75    INSERT INTO address_lab
+ 76    VALUES
+ 77    ( address_lab_s1.NEXTVAL
+ 78    , contact_lab_s1.CURRVAL
+ 79    ,(SELECT   common_lookup_lab_id
+ 80  	 FROM	  common_lookup_lab
+ 81  	 WHERE	  common_lookup_context = 'MULTIPLE'
+ 82  	 AND	  common_lookup_type = pv_address_type)
+ 83    , pv_city
+ 84    , pv_state_province
+ 85    , pv_postal_code
+ 86    , pv_created_by
+ 87    , pv_creation_date
+ 88    , pv_last_updated_by
+ 89    , pv_last_update_date );
+ 90  
+ 91    /* Insert into the street_address_lab table. */
+ 92    INSERT INTO street_address_lab
+ 93    VALUES
+ 94    ( street_address_lab_s1.NEXTVAL
+ 95    , address_lab_s1.CURRVAL
+ 96    , pv_street_address
+ 97    , pv_created_by
+ 98    , pv_creation_date
+ 99    , pv_last_updated_by
+100    , pv_last_update_date );
+101  
+102    /* Insert into the telephone_lab table. */
+103    INSERT INTO telephone_lab
+104    VALUES
+105    ( telephone_lab_s1.NEXTVAL			       -- TELEPHONE_ID
+106    , contact_lab_s1.CURRVAL 			       -- CONTACT_ID
+107    , address_lab_s1.CURRVAL 			       -- ADDRESS_ID
+108    ,(SELECT   common_lookup_lab_id			       -- ADDRESS_TYPE
+109  	 FROM	  common_lookup_lab
+110  	 WHERE	  common_lookup_context = 'MULTIPLE'
+111  	 AND	  common_lookup_type = pv_telephone_type)
+112    , pv_country_code				   -- COUNTRY_CODE
+113    , pv_area_code					   -- AREA_CODE
+114    , pv_telephone_number				   -- TELEPHONE_NUMBER
+115    , pv_created_by					   -- CREATED_BY
+116    , pv_creation_date				   -- CREATION_DATE
+117    , pv_last_updated_by				   -- LAST_UPDATED_BY
+118    , pv_last_update_date);				   -- LAST_UPDATE_DATE
+119  
+120    /* Commit the series of inserts. */
+121    COMMIT;
+122  EXCEPTION
+123    WHEN OTHERS THEN
+124  	 ROLLBACK TO starting_point;
+125  	 RETURN;
+126  END contact_insert;
+127  /
+
+Procedure created.
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --   Query to verify five individual rows of chained inserts through
+SQL> --   a procedure into the five dependent tables.
+SQL> -- ------------------------------------------------------------------
+SQL> 
+SQL> BEGIN
+  2    /* Call the contact_insert procedure. */
+  3    contact_insert(
+  4  	   pv_member_type => 'INDIVIDUAL'
+  5  	 , pv_account_number => 'R11-514-34'
+  6  	 , pv_credit_card_number => '1111-1111-1111-1111'
+  7  	 , pv_credit_card_type => 'VISA_CARD'
+  8  	 , pv_first_name => 'Goeffrey'
+  9  	 , pv_middle_name => 'Ward'
+ 10  	 , pv_last_name => 'Clinton'
+ 11  	 , pv_contact_type => 'CUSTOMER'
+ 12  	 , pv_address_type => 'HOME'
+ 13  	 , pv_city => 'Provo'
+ 14  	 , pv_state_province => 'Utah'
+ 15  	 , pv_postal_code => '84606'
+ 16  	 , pv_street_address => '118 South 9th East'
+ 17  	 , pv_telephone_type => 'HOME'
+ 18  	 , pv_country_code => '001'
+ 19  	 , pv_area_code => '801'
+ 20  	 , pv_telephone_number => '423-1234' );
+ 21  END;
+ 22  /
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> -- Insert second contact.
+SQL> BEGIN
+  2    /* Call athe contact_insert procedure. */
+  3    contact_insert(
+  4  	   pv_member_type => 'INDIVIDUAL'
+  5  	 , pv_account_number => 'R11-514-35'
+  6  	 , pv_credit_card_number => '1111-2222-1111-1111'
+  7  	 , pv_credit_card_type => 'VISA_CARD'
+  8  	 , pv_first_name => 'Wendy'
+  9  	 , pv_last_name => 'Moss'
+ 10  	 , pv_contact_type => 'CUSTOMER'
+ 11  	 , pv_address_type => 'HOME'
+ 12  	 , pv_city => 'Provo'
+ 13  	 , pv_state_province => 'Utah'
+ 14  	 , pv_postal_code => '84606'
+ 15  	 , pv_street_address => '1218 South 10th East'
+ 16  	 , pv_telephone_type => 'HOME'
+ 17  	 , pv_country_code => '001'
+ 18  	 , pv_area_code => '801'
+ 19  	 , pv_telephone_number => '423-1235' );
+ 20  END;
+ 21  /
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> -- Insert third contact.
+SQL> BEGIN
+  2    /* Call the contact_insert procedure. */
+  3    contact_insert(
+  4  	   pv_member_type => 'INDIVIDUAL'
+  5  	 , pv_account_number => 'R11-514-36'
+  6  	 , pv_credit_card_number => '1111-1111-2222-1111'
+  7  	 , pv_credit_card_type => 'VISA_CARD'
+  8  	 , pv_first_name => 'Simon'
+  9  	 , pv_middle_name => 'Jonah'
+ 10  	 , pv_last_name => 'Gretelz'
+ 11  	 , pv_contact_type => 'CUSTOMER'
+ 12  	 , pv_address_type => 'HOME'
+ 13  	 , pv_city => 'Provo'
+ 14  	 , pv_state_province => 'Utah'
+ 15  	 , pv_postal_code => '84606'
+ 16  	 , pv_street_address => '2118 South 7th East'
+ 17  	 , pv_telephone_type => 'HOME'
+ 18  	 , pv_country_code => '001'
+ 19  	 , pv_area_code => '801'
+ 20  	 , pv_telephone_number => '423-1236' );
+ 21  END;
+ 22  /
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> -- Insert fourth contact.
+SQL> BEGIN
+  2    /* Call the contact_insert procedure. */
+  3    contact_insert(
+  4  	   pv_member_type => 'INDIVIDUAL'
+  5  	 , pv_account_number => 'R11-514-37'
+  6  	 , pv_credit_card_number => '3333-1111-1111-2222'
+  7  	 , pv_credit_card_type => 'VISA_CARD'
+  8  	 , pv_first_name => 'Elizabeth'
+  9  	 , pv_middle_name => 'Jane'
+ 10  	 , pv_last_name => 'Royal'
+ 11  	 , pv_contact_type => 'CUSTOMER'
+ 12  	 , pv_address_type => 'HOME'
+ 13  	 , pv_city => 'Provo'
+ 14  	 , pv_state_province => 'Utah'
+ 15  	 , pv_postal_code => '84606'
+ 16  	 , pv_street_address => '2228 South 14th East'
+ 17  	 , pv_telephone_type => 'HOME'
+ 18  	 , pv_country_code => '001'
+ 19  	 , pv_area_code => '801'
+ 20  	 , pv_telephone_number => '423-1237' );
+ 21  END;
+ 22  /
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> -- Insert fifth contact.
+SQL> BEGIN
+  2    /* Call the contact_insert procedure. */
+  3    contact_insert(
+  4  	   pv_member_type => 'INDIVIDUAL'
+  5  	 , pv_account_number => 'R11-514-38'
+  6  	 , pv_credit_card_number => '1111-1111-3333-1111'
+  7  	 , pv_credit_card_type => 'VISA_CARD'
+  8  	 , pv_first_name => 'Brian'
+  9  	 , pv_middle_name => 'Nathan'
+ 10  	 , pv_last_name => 'Smith'
+ 11  	 , pv_contact_type => 'CUSTOMER'
+ 12  	 , pv_address_type => 'HOME'
+ 13  	 , pv_city => 'Spanish Fork'
+ 14  	 , pv_state_province => 'Utah'
+ 15  	 , pv_postal_code => '84606'
+ 16  	 , pv_street_address => '333 North 2nd East'
+ 17  	 , pv_telephone_type => 'HOME'
+ 18  	 , pv_country_code => '001'
+ 19  	 , pv_area_code => '801'
+ 20  	 , pv_telephone_number => '423-1238' );
+ 21  END;
+ 22  /
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> 
+SQL> 
+SQL> COL account_number  FORMAT A10  HEADING "Account|Number"
+SQL> COL full_name	 FORMAT A20  HEADING "Name|(Last, First MI)"
+SQL> COL city		 FORMAT A12  HEADING "City"
+SQL> COL state_province  FORMAT A10  HEADING "State"
+SQL> COL telephone	 FORMAT A18  HEADING "Telephone"
+SQL> SELECT   m.account_number
+  2  ,	      c.last_name || ', ' || c.first_name
+  3  ||       CASE
+  4  		WHEN c.middle_name IS NOT NULL THEN ' ' || SUBSTR(c.middle_name,1,1)
+  5  	      END AS full_name
+  6  ,	      a.city
+  7  ,	      a.state_province
+  8  ,	      t.country_code || '-(' || t.area_code || ') ' || t.telephone_number AS telephone
+  9  FROM     member_lab m INNER JOIN contact_lab c ON m.member_lab_id = c.member_lab_id INNER JOIN
+ 10  	      address_lab a ON c.contact_lab_id = a.contact_lab_id INNER JOIN
+ 11  	      street_address sa ON a.address_lab_id = sa.address_id INNER JOIN
+ 12  	      telephone t ON c.contact_lab_id = t.contact_id AND a.address_lab_id = t.address_id
+ 13  WHERE    m.member_type = (SELECT common_lookup_lab_id
+ 14  			       FROM   common_lookup_lab
+ 15  			       WHERE  common_lookup_context = 'MEMBER_LAB'
+ 16  			       AND    common_lookup_type = 'INDIVIDUAL');
+
+Account    Name                                                                 
+Number     (Last, First MI)     City         State      Telephone               
+---------- -------------------- ------------ ---------- ------------------      
+R11-514-34 Clinton, Goeffrey W  Provo        Utah       001-(801) 423-1234      
+R11-514-35 Moss, Wendy          Provo        Utah       001-(801) 423-1235      
+R11-514-36 Gretelz, Simon J     Provo        Utah       001-(801) 423-1236      
+R11-514-37 Royal, Elizabeth J   Provo        Utah       001-(801) 423-1237      
+R11-514-38 Smith, Brian N       Spanish Fork Utah       001-(801) 423-1238      
+
+5 rows selected.
+
+SQL> 
+SQL> 
+SQL> 
+SQL> 
+SQL> -- Update all MEMBER_TYPE values based on number of dependent CONTACT rows.
+SQL> UPDATE member_lab m
+  2  SET    member_type =
+  3  	     (SELECT   common_lookup_lab_id
+  4  	      FROM     common_lookup_lab
+  5  	      WHERE    common_lookup_context = 'MEMBER_LAB'
+  6  	      AND      common_lookup_type =
+  7  			(SELECT  dt.member_type
+  8  			 FROM	(SELECT   c.member_lab_id
+  9  				 ,	  CASE
+ 10  					    WHEN COUNT(c.member_lab_id) > 1 THEN 'GROUP'
+ 11  					    ELSE 'INDIVIDUAL'
+ 12  					  END AS member_type
+ 13  				 FROM	  contact_lab c
+ 14  				 GROUP BY c.member_lab_id) dt
+ 15  			 WHERE	  dt.member_lab_id = m.member_lab_id));
+
+13 rows updated.
+
+SQL> 
+SQL> -- Modify the MEMBER table to add a NOT NULL constraint to the MEMBER_TYPE column.
+SQL> ALTER TABLE member_lab
+  2    MODIFY (member_type  NUMBER  CONSTRAINT nn_member_lab_1	NOT NULL);
+  MODIFY (member_type  NUMBER  CONSTRAINT nn_member_lab_1  NOT NULL)
+          *
+ERROR at line 2:
+ORA-01442: column to be modified to NOT NULL is already NOT NULL 
+
+
+SQL> 
+SQL> -- Use SQL*Plus report formatting commands.
+SQL> COLUMN member_lab_id	   FORMAT 999999 HEADING "MEMBER|ID"
+SQL> COLUMN members	       FORMAT 999999 HEADING "MEMBER|QTY #"
+SQL> COLUMN member_type        FORMAT 999999 HEADING "MEMBER|TYPE|ID #"
+SQL> COLUMN common_lookup_lab_id   FORMAT 999999 HEADING "MEMBER|LOOKUP|ID #"
+SQL> COLUMN common_lookup_type FORMAT A12    HEADING "COMMON|LOOKUP|TYPE"
+SQL> SELECT   m.member_lab_id
+  2  ,	      COUNT(contact_lab_id) AS MEMBERS
+  3  ,	      m.member_type
+  4  ,	      cl.common_lookup_lab_id
+  5  ,	      cl.common_lookup_type
+  6  FROM     member_lab m INNER JOIN contact_lab c
+  7  ON       m.member_lab_id = c.member_lab_id INNER JOIN common_lookup_lab cl
+  8  ON       m.member_type = cl.common_lookup_lab_id
+  9  GROUP BY m.member_lab_id
+ 10  ,	      m.member_type
+ 11  ,	      cl.common_lookup_lab_id
+ 12  ,	      cl.common_lookup_type
+ 13  ORDER BY m.member_lab_id;
+
+                 MEMBER  MEMBER COMMON                                          
+ MEMBER  MEMBER    TYPE  LOOKUP LOOKUP                                          
+     ID   QTY #    ID #    ID # TYPE                                            
+------- ------- ------- ------- ------------                                    
+   1001       2    1004    1004 GROUP                                           
+   1002       2    1004    1004 GROUP                                           
+   1003       3    1004    1004 GROUP                                           
+   1004       1    1003    1003 INDIVIDUAL                                      
+   1005       1    1003    1003 INDIVIDUAL                                      
+   1006       1    1003    1003 INDIVIDUAL                                      
+   1007       1    1003    1003 INDIVIDUAL                                      
+   1008       1    1003    1003 INDIVIDUAL                                      
+   1012       1    1003    1003 INDIVIDUAL                                      
+   1013       1    1003    1003 INDIVIDUAL                                      
+   1014       1    1003    1003 INDIVIDUAL                                      
+   1015       1    1003    1003 INDIVIDUAL                                      
+   1016       1    1003    1003 INDIVIDUAL                                      
+
+13 rows selected.
+
+SQL> 
+SQL> -- Commit changes.
+SQL> COMMIT;
+
+Commit complete.
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --   Query to verify nine rental agreements, some with one and some
+SQL> --   with more than one rental item.
+SQL> -- ------------------------------------------------------------------
+SQL> 
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> -- Insert 5 records in the RENTAL table.
+SQL> -- ------------------------------------------------------------------
+SQL> 
+SQL> INSERT INTO rental_lab
+  2  ( rental_lab_id
+  3  , customer_id
+  4  , check_out_date
+  5  , return_date
+  6  , created_by
+  7  , creation_date
+  8  , last_updated_by
+  9  , last_update_date )
+ 10  VALUES
+ 11  ( rental_lab_s1.nextval
+ 12  ,(SELECT	contact_lab_id
+ 13    FROM	contact_lab
+ 14    WHERE	last_name = 'Vizquel'
+ 15    AND	first_name = 'Oscar')
+ 16  , TRUNC(SYSDATE)
+ 17  , TRUNC(SYSDATE) + 5
+ 18  , 1001
+ 19  , SYSDATE
+ 20  , 1001
+ 21  , SYSDATE);
+INSERT INTO rental_lab
+*
+ERROR at line 1:
+ORA-00001: unique constraint (STUDENT.PK_RENTAL_LAB_1) violated 
+
+
+SQL> 
+SQL> INSERT INTO rental_lab
+  2  ( rental_lab_id
+  3  , customer_id
+  4  , check_out_date
+  5  , return_date
+  6  , created_by
+  7  , creation_date
+  8  , last_updated_by
+  9  , last_update_date )
+ 10  VALUES
+ 11  ( rental_lab_s1.nextval
+ 12  ,(SELECT	contact_lab_id
+ 13    FROM	contact_lab
+ 14    WHERE	last_name = 'Vizquel'
+ 15    AND	first_name = 'Doreen')
+ 16  , TRUNC(SYSDATE)
+ 17  , TRUNC(SYSDATE) + 5
+ 18  , 1001
+ 19  , SYSDATE
+ 20  , 1001
+ 21  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO rental_lab
+  2  ( rental_lab_id
+  3  , customer_id
+  4  , check_out_date
+  5  , return_date
+  6  , created_by
+  7  , creation_date
+  8  , last_updated_by
+  9  , last_update_date )
+ 10  VALUES
+ 11  ( rental_lab_s1.nextval
+ 12  ,(SELECT	contact_lab_id
+ 13    FROM	contact_lab
+ 14    WHERE	last_name = 'Sweeney'
+ 15    AND	first_name = 'Meaghan')
+ 16  , TRUNC(SYSDATE)
+ 17  , TRUNC(SYSDATE) + 5
+ 18  , 1001
+ 19  , SYSDATE
+ 20  , 1001
+ 21  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO rental_lab
+  2  ( rental_lab_id
+  3  , customer_id
+  4  , check_out_date
+  5  , return_date
+  6  , created_by
+  7  , creation_date
+  8  , last_updated_by
+  9  , last_update_date )
+ 10  VALUES
+ 11  ( rental_lab_s1.nextval
+ 12  ,(SELECT	contact_lab_id
+ 13    FROM	contact_lab
+ 14    WHERE	last_name = 'Sweeney'
+ 15    AND	first_name = 'Ian')
+ 16  , TRUNC(SYSDATE)
+ 17  , TRUNC(SYSDATE) + 5
+ 18  , 1001
+ 19  , SYSDATE
+ 20  , 1001
+ 21  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO rental_lab
+  2  ( rental_lab_id
+  3  , customer_id
+  4  , check_out_date
+  5  , return_date
+  6  , created_by
+  7  , creation_date
+  8  , last_updated_by
+  9  , last_update_date )
+ 10  VALUES
+ 11  ( rental_lab_s1.nextval
+ 12  ,(SELECT	contact_lab_id
+ 13    FROM	contact_lab
+ 14    WHERE	last_name = 'Winn'
+ 15    AND	first_name = 'Brian')
+ 16  , TRUNC(SYSDATE)
+ 17  , TRUNC(SYSDATE) + 5
+ 18  , 1001
+ 19  , SYSDATE
+ 20  , 1001
+ 21  , SYSDATE);
+
+1 row created.
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> -- Insert 9 records in the RENTAL_ITEM table.
+SQL> -- ------------------------------------------------------------------
+SQL> 
+SQL> INSERT INTO rental_item_lab
+  2  ( rental_item_lab_id
+  3  , rental_lab_id
+  4  , item_lab_id
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date)
+  9  VALUES
+ 10  ( rental_item_lab_s1.nextval
+ 11  ,(SELECT	r.rental_lab_id
+ 12    FROM	rental_lab r
+ 13    ,	contact_lab c
+ 14    WHERE	r.customer_id = c.contact_lab_id
+ 15    AND	c.last_name = 'Vizquel'
+ 16    AND	c.first_name = 'Oscar')
+ 17  ,(SELECT	i.item_lab_id
+ 18    FROM	item_lab i
+ 19    ,	common_lookup_lab cl
+ 20    WHERE	i.item_title = 'Star Wars I'
+ 21    AND	i.item_subtitle = 'Phantom Menace'
+ 22    AND	i.item_type = cl.common_lookup_lab_id
+ 23    AND	cl.common_lookup_type = 'DVD_WIDE_SCREEN')
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+,(SELECT   i.item_lab_id
+  *
+ERROR at line 17:
+ORA-01427: single-row subquery returns more than one row 
+
+
+SQL> 
+SQL> INSERT INTO rental_item_lab
+  2  ( rental_item_lab_id
+  3  , rental_lab_id
+  4  , item_lab_id
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date)
+  9  VALUES
+ 10  ( rental_item_lab_s1.nextval
+ 11  ,(SELECT	r.rental_lab_id
+ 12    FROM	rental_lab r inner join contact_lab c
+ 13    ON	r.customer_id = c.contact_lab_id
+ 14    WHERE	c.last_name = 'Vizquel'
+ 15    AND	c.first_name = 'Oscar')
+ 16  ,(SELECT	d.item_lab_id
+ 17    FROM	item_lab d join common_lookup_lab cl
+ 18    ON	d.item_title = 'Star Wars II'
+ 19    WHERE	d.item_subtitle = 'Attack of the Clones'
+ 20    AND	d.item_type = cl.common_lookup_lab_id
+ 21    AND	cl.common_lookup_type = 'DVD_WIDE_SCREEN')
+ 22  , 1001
+ 23  , SYSDATE
+ 24  , 1001
+ 25  , SYSDATE);
+,(SELECT   d.item_lab_id
+  *
+ERROR at line 16:
+ORA-01427: single-row subquery returns more than one row 
+
+
+SQL> 
+SQL> INSERT INTO rental_item_lab
+  2  ( rental_item_lab_id
+  3  , rental_lab_id
+  4  , item_lab_id
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date)
+  9  VALUES
+ 10  ( rental_item_lab_s1.nextval
+ 11  ,(SELECT	r.rental_lab_id
+ 12    FROM	rental_lab r
+ 13    ,	contact_lab c
+ 14    WHERE	r.customer_id = c.contact_lab_id
+ 15    AND	c.last_name = 'Vizquel'
+ 16    AND	c.first_name = 'Oscar')
+ 17  ,(SELECT	d.item_lab_id
+ 18    FROM	item_lab d
+ 19    ,	common_lookup_lab cl
+ 20    WHERE	d.item_title = 'Star Wars III'
+ 21    AND	d.item_subtitle = 'Revenge of the Sith'
+ 22    AND	d.item_type = cl.common_lookup_lab_id
+ 23    AND	cl.common_lookup_type = 'DVD_WIDE_SCREEN')
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+,(SELECT   d.item_lab_id
+  *
+ERROR at line 17:
+ORA-01427: single-row subquery returns more than one row 
+
+
+SQL> 
+SQL> INSERT INTO rental_item_lab
+  2  ( rental_item_lab_id
+  3  , rental_lab_id
+  4  , item_lab_id
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date)
+  9  VALUES
+ 10  ( rental_item_lab_s1.nextval
+ 11  ,(SELECT	r.rental_lab_id
+ 12    FROM	rental_lab r
+ 13    ,	contact_lab c
+ 14    WHERE	r.customer_id = c.contact_lab_id
+ 15    AND	c.last_name = 'Vizquel'
+ 16    AND	c.first_name = 'Doreen')
+ 17  ,(SELECT	d.item_lab_id
+ 18    FROM	item_lab d
+ 19    ,	common_lookup_lab cl
+ 20    WHERE	d.item_title = 'I Remember Mama'
+ 21    AND	d.item_subtitle IS NULL
+ 22    AND	d.item_type = cl.common_lookup_lab_id
+ 23    AND	cl.common_lookup_type = 'BLU-RAY')
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+,(SELECT   r.rental_lab_id
+  *
+ERROR at line 11:
+ORA-01427: single-row subquery returns more than one row 
+
+
+SQL> 
+SQL> INSERT INTO rental_item_lab
+  2  ( rental_item_lab_id
+  3  , rental_lab_id
+  4  , item_lab_id
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date)
+  9  VALUES
+ 10  ( rental_item_lab_s1.nextval
+ 11  ,(SELECT	r.rental_lab_id
+ 12    FROM	rental_lab r
+ 13    ,	contact_lab c
+ 14    WHERE	r.customer_id = c.contact_lab_id
+ 15    AND	c.last_name = 'Vizquel'
+ 16    AND	c.first_name = 'Doreen')
+ 17  ,(SELECT	d.item_lab_id
+ 18    FROM	item_lab d
+ 19    ,	common_lookup_lab cl
+ 20    WHERE	d.item_title = 'Camelot'
+ 21    AND	d.item_subtitle IS NULL
+ 22    AND	d.item_type = cl.common_lookup_lab_id
+ 23    AND	cl.common_lookup_type = 'BLU-RAY')
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+,(SELECT   r.rental_lab_id
+  *
+ERROR at line 11:
+ORA-01427: single-row subquery returns more than one row 
+
+
+SQL> 
+SQL> INSERT INTO rental_item_lab
+  2  ( rental_item_lab_id
+  3  , rental_lab_id
+  4  , item_lab_id
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date)
+  9  VALUES
+ 10  ( rental_item_lab_s1.nextval
+ 11  ,(SELECT	r.rental_lab_id
+ 12    FROM	rental_lab r
+ 13    ,	contact_lab c
+ 14    WHERE	r.customer_id = c.contact_lab_id
+ 15    AND	c.last_name = 'Sweeney'
+ 16    AND	c.first_name = 'Meaghan')
+ 17  ,(SELECT	d.item_lab_id
+ 18    FROM	item_lab d
+ 19    ,	common_lookup_lab cl
+ 20    WHERE	d.item_title = 'Hook'
+ 21    AND	d.item_subtitle IS NULL
+ 22    AND	d.item_type = cl.common_lookup_lab_id
+ 23    AND	cl.common_lookup_type = 'BLU-RAY')
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+,(SELECT   r.rental_lab_id
+  *
+ERROR at line 11:
+ORA-01427: single-row subquery returns more than one row 
+
+
+SQL> 
+SQL> INSERT INTO rental_item_lab
+  2  ( rental_item_lab_id
+  3  , rental_lab_id
+  4  , item_lab_id
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date)
+  9  VALUES
+ 10  ( rental_item_lab_s1.nextval
+ 11  ,(SELECT	r.rental_lab_id
+ 12    FROM	rental_lab r
+ 13    ,	contact_lab c
+ 14    WHERE	r.customer_id = c.contact_lab_id
+ 15    AND	c.last_name = 'Sweeney'
+ 16    AND	c.first_name = 'Ian')
+ 17  ,(SELECT	d.item_lab_id
+ 18    FROM	item_lab d
+ 19    ,	common_lookup_lab cl
+ 20    WHERE	d.item_title = 'Cars'
+ 21    AND	d.item_subtitle IS NULL
+ 22    AND	d.item_type = cl.common_lookup_lab_id
+ 23    AND	cl.common_lookup_type = 'XBOX')
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+,(SELECT   r.rental_lab_id
+  *
+ERROR at line 11:
+ORA-01427: single-row subquery returns more than one row 
+
+
+SQL> 
+SQL> INSERT INTO rental_item_lab
+  2  ( rental_item_lab_id
+  3  , rental_lab_id
+  4  , item_lab_id
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date)
+  9  VALUES
+ 10  ( rental_item_lab_s1.nextval
+ 11  ,(SELECT	r.rental_lab_id
+ 12    FROM	rental_lab r
+ 13    ,	contact_lab c
+ 14    WHERE	r.customer_id = c.contact_lab_id
+ 15    AND	c.last_name = 'Winn'
+ 16    AND	c.first_name = 'Brian')
+ 17  ,(SELECT	d.item_lab_id
+ 18    FROM	item_lab d
+ 19    ,	common_lookup_lab cl
+ 20    WHERE	d.item_title = 'RoboCop'
+ 21    AND	d.item_subtitle IS NULL
+ 22    AND	d.item_type = cl.common_lookup_lab_id
+ 23    AND	cl.common_lookup_type = 'XBOX')
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+,(SELECT   r.rental_lab_id
+  *
+ERROR at line 11:
+ORA-01427: single-row subquery returns more than one row 
+
+
+SQL> 
+SQL> INSERT INTO rental_item_lab
+  2  ( rental_item_lab_id
+  3  , rental_lab_id
+  4  , item_lab_id
+  5  , created_by
+  6  , creation_date
+  7  , last_updated_by
+  8  , last_update_date)
+  9  VALUES
+ 10  ( rental_item_lab_s1.nextval
+ 11  ,(SELECT	r.rental_lab_id
+ 12    FROM	rental_lab r
+ 13    ,	contact_lab c
+ 14    WHERE	r.customer_id = c.contact_lab_id
+ 15    AND	c.last_name = 'Winn'
+ 16    AND	c.first_name = 'Brian')
+ 17  ,(SELECT	d.item_lab_id
+ 18    FROM	item_lab d
+ 19    ,	common_lookup_lab cl
+ 20    WHERE	d.item_title = 'The Hunt for Red October'
+ 21    AND	d.item_subtitle = 'Special Collector''s Edition'
+ 22    AND	d.item_type = cl.common_lookup_lab_id
+ 23    AND	cl.common_lookup_type = 'DVD_WIDE_SCREEN')
+ 24  , 1001
+ 25  , SYSDATE
+ 26  , 1001
+ 27  , SYSDATE);
+,(SELECT   r.rental_lab_id
+  *
+ERROR at line 11:
+ORA-01427: single-row subquery returns more than one row 
+
+
+SQL> 
+SQL> 
+SQL> 
+SQL> COL member_lab_id	     FORMAT 9999 HEADING "Member|ID #"
+SQL> COL account_number  FORMAT A10  HEADING "Account|Number"
+SQL> COL full_name	 FORMAT A20  HEADING "Name|(Last, First MI)"
+SQL> COL rental_lab_id	     FORMAT 9999 HEADING "Rent|ID #"
+SQL> COL rental_item_lab_id  FORMAT 9999 HEADING "Rent|Item|ID #"
+SQL> COL item_title	 FORMAT A26  HEADING "Item Title"
+SQL> SELECT   m.member_lab_id
+  2  ,	      m.account_number
+  3  ,	      c.last_name || ', ' || c.first_name
+  4  ||       CASE
+  5  		WHEN c.middle_name IS NOT NULL THEN ' ' || SUBSTR(c.middle_name,1,1)
+  6  	      END AS full_name
+  7  ,	      r.rental_lab_id
+  8  ,	      ri.rental_item_lab_id
+  9  ,	      i.item_title
+ 10  FROM     member_lab m INNER JOIN contact_lab c ON m.member_lab_id = c.member_lab_id INNER JOIN
+ 11  	      rental_lab r ON c.contact_lab_id = r.customer_id INNER JOIN
+ 12  	      rental_item_lab ri ON r.rental_lab_id = ri.rental_lab_id INNER JOIN
+ 13  	      item_lab i ON ri.item_lab_id = i.item_lab_id
+ 14  ORDER BY r.rental_lab_id;
+
+                                              Rent                              
+Member Account    Name                  Rent  Item                              
+  ID # Number     (Last, First MI)      ID #  ID # Item Title                   
+------ ---------- -------------------- ----- ----- --------------------------   
+  1002 B293-71446 Vizquel, Oscar        1001  1014 Star Wars I                  
+  1002 B293-71446 Vizquel, Oscar        1001  1015 Star Wars II                 
+  1002 B293-71446 Vizquel, Oscar        1001  1002 Star Wars III                
+  1002 B293-71446 Vizquel, Doreen       1010  1017 Camelot                      
+  1002 B293-71446 Vizquel, Doreen       1010  1016 I Remember Mama              
+  1003 B293-71447 Sweeney, Meaghan      1011  1018 Hook                         
+  1003 B293-71447 Sweeney, Ian M        1012  1019 Cars                         
+  1001 B293-71445 Winn, Brian           1013  1003 The Hunt for Red October     
+  1001 B293-71445 Winn, Brian           1013  1020 RoboCop                      
+
+9 rows selected.
+
+SQL> 
+SQL> 
+SQL> -- --------------------------------------------------------
+SQL> --  Step #1
+SQL> --  --------
+SQL> --   Display the rows in the member and contact tables.
+SQL> -- --------------------------------------------------------
+SQL> 
+SQL> COL member_lab_id		 FORMAT 9999  HEADING "Member|ID #"
+SQL> COL members	     FORMAT 9999  HEADING "Member|#"
+SQL> COL common_lookup_type  FORMAT A12   HEADING "Common|Lookup Type"
+SQL> SELECT   m.member_lab_id
+  2  ,	      COUNT(contact_lab_id) AS MEMBERS
+  3  ,	      cl.common_lookup_type
+  4  FROM     member_lab m INNER JOIN contact_lab c
+  5  ON       m.member_lab_id = c.member_lab_id INNER JOIN common_lookup_lab cl
+  6  ON       m.member_type = cl.common_lookup_lab_id
+  7  GROUP BY m.member_lab_id
+  8  ,	      m.member_type
+  9  ,	      cl.common_lookup_lab_id
+ 10  ,	      cl.common_lookup_type
+ 11  ORDER BY m.member_lab_id;
+
+Member Member Common                                                            
+  ID #      # Lookup Type                                                       
+------ ------ ------------                                                      
+  1001      2 GROUP                                                             
+  1002      2 GROUP                                                             
+  1003      3 GROUP                                                             
+  1004      1 INDIVIDUAL                                                        
+  1005      1 INDIVIDUAL                                                        
+  1006      1 INDIVIDUAL                                                        
+  1007      1 INDIVIDUAL                                                        
+  1008      1 INDIVIDUAL                                                        
+  1012      1 INDIVIDUAL                                                        
+  1013      1 INDIVIDUAL                                                        
+  1014      1 INDIVIDUAL                                                        
+  1015      1 INDIVIDUAL                                                        
+  1016      1 INDIVIDUAL                                                        
+
+13 rows selected.
+
+SQL> 
+SQL> -- --------------------------------------------------------
+SQL> --  Step #2
+SQL> --  --------
+SQL> --   Create a view .
+SQL> -- --------------------------------------------------------
+SQL> CREATE OR REPLACE VIEW current_rental AS
+  2    SELECT	m.account_number
+  3    ,	c.last_name || ', ' || c.first_name
+  4    ||	CASE
+  5  		  WHEN c.middle_name IS NOT NULL THEN ' ' || SUBSTR(c.middle_name,1,1)
+  6  		END AS full_name
+  7    ,	i.item_title AS title
+  8    ,	i.item_subtitle AS subtitle
+  9    ,	SUBSTR(cl.common_lookup_meaning,1,3) AS product
+ 10    ,	r.check_out_date
+ 11    ,	r.return_date
+ 12    FROM	member_lab m INNER JOIN contact_lab c ON m.member_lab_id = c.member_lab_id INNER JOIN
+ 13  		rental_lab r ON c.contact_lab_id = r.customer_id INNER JOIN
+ 14  		rental_item_lab ri ON r.rental_lab_id = ri.rental_lab_id INNER JOIN
+ 15  		item_lab i ON ri.item_lab_id = i.item_lab_id INNER JOIN
+ 16  		common_lookup_lab cl ON i.item_lab_id = cl.common_lookup_lab_id
+ 17    ORDER BY 1, 2, 3;
+
+View created.
+
+SQL> 
+SQL> -- --------------------------------------------------------
+SQL> --  Step #3
+SQL> --  --------
+SQL> --   Display the content of a view .
+SQL> -- --------------------------------------------------------
+SQL> COL full_name	FORMAT A24
+SQL> COL title		FORMAT A30
+SQL> COL subtitlei	FORMAT A4
+SQL> COL product	FORMAT A7
+SQL> COL check_out_date FORMAT A11
+SQL> COL return_date	FORMAT A11
+SQL> SELECT   cr.full_name
+  2  ,	      cr.title
+  3  ,	      cr.check_out_date
+  4  ,	      cr.return_date
+  5  FROM     current_rental cr;
+
+Name                                                                            
+(Last, First MI)         TITLE                          CHECK_OUT_D RETURN_DATE 
+------------------------ ------------------------------ ----------- ----------- 
+Winn, Brian              RoboCop                        26-JUN-18   01-JUL-18   
+Winn, Brian              The Hunt for Red October       26-JUN-18   01-JUL-18   
+Vizquel, Oscar           Star Wars I                    26-JUN-18   01-JUL-18   
+Vizquel, Oscar           Star Wars II                   26-JUN-18   01-JUL-18   
+Vizquel, Oscar           Star Wars III                  26-JUN-18   01-JUL-18   
+Sweeney, Ian M           Cars                           26-JUN-18   01-JUL-18   
+
+6 rows selected.
+
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  Close log file.
+SQL> -- ------------------------------------------------------------------
+SQL> 
+SQL> SPOOL OFF

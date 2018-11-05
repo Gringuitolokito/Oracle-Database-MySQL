@@ -1,0 +1,8 @@
+-- Define a bind variable.
+VARIABLE table_name VARCHAR2(30)
+ 
+-- Assign an uppercase string to a session bind variable.
+BEGIN
+  :table_name := UPPER('chicken');
+END;
+/
